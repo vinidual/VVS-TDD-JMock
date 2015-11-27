@@ -24,10 +24,10 @@ public class TestLexicalAnalyzerJMock {
 	@Test
 	public void fileExist(){
 		final MockLexicalAnalyzerListener mock = ctx.mock(MockLexicalAnalyzerListener.class);
-		lae.addListener(mock);
 		ctx.checking(new Expectations(){{
-			oneOf(mock).fileExist("file exist!");
+			oneOf(mock).fileExist("file exists!");
 		}});
+		lae.addListener(mock);
 		lae.fileExist("src/file.cm");
 	}
 	
@@ -43,128 +43,79 @@ public class TestLexicalAnalyzerJMock {
 	
 	@Test
 	public void fileValidExtension(){
-		
+		final MockLexicalAnalyzerListener mock = ctx.mock(MockLexicalAnalyzerListener.class);
+		ctx.checking(new Expectations(){{
+			atLeast(1).of(mock).fileValidateExtension("valid file extension!");
+			never(mock).fileValidateExtension("invalid file extension!");
+		}});
+		lae.addListener(mock);
+		lae.validateExtension("anything.cm");
+		lae.validateExtension(".cm");
+		lae.validateExtension("anything.again.cm");
+		lae.validateExtension("I.don't.care.about.my.filename!#@.cm");
+		lae.validateExtension("1125653.cm");
+		lae.validateExtension("sas1254.cm");
+		lae.validateExtension("###8**DIE!!@@.cm");
 	}
 	
 	@Test
 	public void fileInvalidExtension(){
-		
+		final MockLexicalAnalyzerListener mock = ctx.mock(MockLexicalAnalyzerListener.class);
+		ctx.checking(new Expectations(){{
+			atLeast(1).of(mock).fileValidateExtension("invalid file extension!");
+			never(mock).fileValidateExtension("valid file extension!");
+		}});
+		lae.addListener(mock);
+		lae.validateExtension("anything.txt");
+		lae.validateExtension(".c");
+		lae.validateExtension("filecm");
+		lae.validateExtension("file.cm.cm.cm.cm.cm.cm.cn");
+		lae.validateExtension("1125653");
+		lae.validateExtension(".cm.java");
+		lae.validateExtension("#1;A!@.8");
 	}
 	
 	@Test
 	public void fileReaded(){
-		
+		final MockLexicalAnalyzerListener mock = ctx.mock(MockLexicalAnalyzerListener.class);
+		lae.addListener(mock);
+		String file = "src/file.cm";
+		ctx.checking(new Expectations(){{
+			oneOf(mock).fileExist("file exists!");
+			oneOf(mock).fileValidateExtension("valid file extension!");
+			oneOf(mock).fileReadable("file read successfully!");
+		}});
+		lae.fileExist(file);
+		lae.validateExtension(file);
+		lae.fileReader();
 	}
 	
 	@Test
 	public void fileHasLexicalError(){
-		
+		final MockLexicalAnalyzerListener mock = ctx.mock(MockLexicalAnalyzerListener.class);
+		lae.addListener(mock);
+		String file = "src/file_error.cm";
+		ctx.checking(new Expectations(){{
+			atLeast(1).of(mock).putError("ERR");
+		}});
+		lae.fileExist(file);
+		lae.validateExtension(file);
+		lae.fileReader();
+		lae.bufferAnalyzer();
 	}
 	
 	@Test
 	public void fileIsCorrect(){
-		
+		final MockLexicalAnalyzerListener mock = ctx.mock(MockLexicalAnalyzerListener.class);
+		lae.addListener(mock);
+		String file = "src/file.cm";
+		ctx.checking(new Expectations(){{
+			never(mock).putError("ERR");
+		}});
+		lae.fileExist(file);
+		lae.validateExtension(file);
+		lae.fileReader();
+		lae.bufferAnalyzer();
 	}
-	
-	
-	/*
-	@Test
-	public void fileInexistent() {
-		file = new FileCheck("file");
-		assertFalse(file.exists());
-	}
-	
-	@Test
-	public void fileExist() {
-		file = new FileCheck("src/testSuccess.cm");
-		assertTrue(file.exists());
-	}
-
-	
-	@Test
-	public void fileExtensionInvalid() {
-		file = new FileCheck("testInvalid.txt");
-		assertFalse(file.verifyExtension());
-	}
-	
-	@Test
-	public void fileExtensionValid() {
-		file = new FileCheck("testValid.cm");
-		assertTrue(file.verifyExtension());
-	}
-	
-	@Test
-	public void fileScannerCreated() {
-		file = new FileCheck("src/file.cm");
-		assertTrue(fs.createFileScanner(file.getFile()));
-	}
-	
-	@Test
-	public void validCaracterVectorReaded(){
-		char[] expected = {'1','2','3',';'};
-		file = new FileCheck("src/testNumValid.cm");
-		fs.createFileScanner(file.getFile());
-		assertArrayEquals(expected, fs.readFile());
-	}
-	
-	@Test
-	public void validTokenReserved(){
-		file = new FileCheck("src/file.cm");
-		fs.createFileScanner(file.getFile());
-		assertTrue(la.checkTokenReserved("int"));
-	}
-	
-	@Test
-	public void lexicalError1() {
-		file = new FileCheck("src/file.cm");
-		fs.createFileScanner(file.getFile());
-		char[] buffer = {'#','$','a','\n'};
-		la.lexicalAnalysis(buffer);
-		expected.clear();
-		expected.add("ERR");
-		expected.add("ERR");
-		expected.add("ID");
-		assertEquals(expected, la.getResult());
-	}
-	
-	@Test
-	public void lexicalError2() {
-		file = new FileCheck("src/file.cm");
-		fs.createFileScanner(file.getFile());
-		char[] buffer = {'#','$', '~','a','\n','&'};
-		la.lexicalAnalysis(buffer);
-		expected.clear();
-		expected.add("ERR");
-		expected.add("ERR");
-		expected.add("ID");
-		System.out.println(la.getError());
-		assertFalse(la.getError().compareTo("Successfull Analysis")==0);
-	}
-	
-	@Test
-	public void successfullAnalysis1() {
-		file = new FileCheck("src/file.cm");
-		fs.createFileScanner(file.getFile());
-		char[] buffer = fs.readFile();
-		la.lexicalAnalysis(buffer);
-		expected.clear();
-		expected.add("ID");
-		expected.add("ATR");
-		expected.add("NUM");
-		expected.add("COMPT");
-		assertEquals(expected, la.getResult());
-	}
-	
-	@Test
-	public void successfullAnalysis2() {
-		file = new FileCheck("src/file.cm");
-		fs.createFileScanner(file.getFile());
-		char[] buffer = fs.readFile();
-		la.lexicalAnalysis(buffer);
-		assertTrue(la.getError().compareTo("Successfull Analysis")==0);
-	}
-	*/
-	
-	
 
 }
