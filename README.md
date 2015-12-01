@@ -33,6 +33,8 @@ A classe responsável pela análise léxica - `LexicalAnalyzerExecutor.java` - p
 
 Nesse caso devemos trocar a depêndencia  por um `mock object` e enviá-lo para a classe que está sendo testada para verificar o que está sendo retornado.
 
+Para isso é necessário criar uma `interface` que possa substituir a depêndencia. Assim vamos mostrar gradualmente como essa interface é implementada.
+
 ## Testes 
 
 A `Task list` utilizada foi a seguinte:
@@ -45,7 +47,60 @@ A `Task list` utilizada foi a seguinte:
 - Análise léxica com erros.
 - Análise léxica com sucesso.
 
+### Arquivo existente
+
+O teste para arquivo existente é o seguinte:
+
+      @Test
+    	public void fileExist(){
+    		ctx.checking(new Expectations(){{
+    			oneOf(mock).fileExist("file exists!");
+    		}});
+    		lae.addListener(mock);
+    		lae.fileExist("src/file.cm");
+    	}
+    	
+Temos no escopo global a instância do nosso mock: 
+
+    final LexicalAnalyzerListener mock = ctx.mock(LexicalAnalyzerListener.class);
+    
+Já estamos citando um passo do processo de refatoraçao, pois inicialmente todos os testes instânciavam seu próprio mock, assim criamos somente uma instância para todos os testes.
+
+O método `.addListener()` recebe e inicializa o  `Listener`. 
+O método `.fileExiste()` é uma implementaçao necessária da `interface` que mockamos. Além disso, é esperado pelo nosso teste que esse método seja invocado uma única vez.
+
 ### Arquivo inexistente
+
+O teste verifica a inexistencia para um dado arquivo.
+
+      @Test
+    	public void fileNotExist(){
+    		lae.addListener(mock);
+    		ctx.checking(new Expectations(){{
+    			oneOf(mock).fileExist("file not found!");
+    		}});
+    		lae.fileExist("file.cm");
+    	}
+    	
+### Arquivo com extensao válida
+
+Verifica se a extensao do arquivo é correta.
+
+      @Test
+    	public void fileValidExtension(){
+    		ctx.checking(new Expectations(){{
+    			atLeast(1).of(mock).fileValidateExtension("valid file extension!");
+    			never(mock).fileValidateExtension("invalid file extension!");
+    		}});
+    		lae.addListener(mock);
+    		lae.validateExtension("anything.cm");
+    		lae.validateExtension(".cm");
+    		lae.validateExtension("anything.again.cm");
+    		lae.validateExtension("I.don't.care.about.my.filename!#@.cm");
+    		lae.validateExtension("1125653.cm");
+    		lae.validateExtension("sas1254.cm");
+    		lae.validateExtension("###8**DIE!!@@.cm");
+    	}
 
 
 
