@@ -7,7 +7,7 @@ import org.junit.Rule;
 import org.junit.Test;
 
 import br.com.Model.LexicalAnalyzerExecutor;
-import br.com.Model.MockLexicalAnalyzerListener;
+import br.com.Model.LexicalAnalyzerListener;
 
 public class TestLexicalAnalyzerJMock {
 	
@@ -21,9 +21,11 @@ public class TestLexicalAnalyzerJMock {
 		lae = new LexicalAnalyzerExecutor();
 	}
 	
+	final LexicalAnalyzerListener mock = ctx.mock(LexicalAnalyzerListener.class);
+	String file;
+	
 	@Test
 	public void fileExist(){
-		final MockLexicalAnalyzerListener mock = ctx.mock(MockLexicalAnalyzerListener.class);
 		ctx.checking(new Expectations(){{
 			oneOf(mock).fileExist("file exists!");
 		}});
@@ -33,7 +35,6 @@ public class TestLexicalAnalyzerJMock {
 	
 	@Test
 	public void fileNotExist(){
-		final MockLexicalAnalyzerListener mock = ctx.mock(MockLexicalAnalyzerListener.class);
 		lae.addListener(mock);
 		ctx.checking(new Expectations(){{
 			oneOf(mock).fileExist("file not found!");
@@ -43,7 +44,6 @@ public class TestLexicalAnalyzerJMock {
 	
 	@Test
 	public void fileValidExtension(){
-		final MockLexicalAnalyzerListener mock = ctx.mock(MockLexicalAnalyzerListener.class);
 		ctx.checking(new Expectations(){{
 			atLeast(1).of(mock).fileValidateExtension("valid file extension!");
 			never(mock).fileValidateExtension("invalid file extension!");
@@ -60,7 +60,6 @@ public class TestLexicalAnalyzerJMock {
 	
 	@Test
 	public void fileInvalidExtension(){
-		final MockLexicalAnalyzerListener mock = ctx.mock(MockLexicalAnalyzerListener.class);
 		ctx.checking(new Expectations(){{
 			atLeast(1).of(mock).fileValidateExtension("invalid file extension!");
 			never(mock).fileValidateExtension("valid file extension!");
@@ -77,13 +76,14 @@ public class TestLexicalAnalyzerJMock {
 	
 	@Test
 	public void fileReaded(){
-		final MockLexicalAnalyzerListener mock = ctx.mock(MockLexicalAnalyzerListener.class);
 		lae.addListener(mock);
-		String file = "src/file.cm";
+		file = "src/file.cm";
 		ctx.checking(new Expectations(){{
 			oneOf(mock).fileExist("file exists!");
 			oneOf(mock).fileValidateExtension("valid file extension!");
 			oneOf(mock).fileReadable("file read successfully!");
+			never(mock).fileReadable("file cannot be read!");
+			never(mock).fileError(with(any(String.class)));
 		}});
 		lae.fileExist(file);
 		lae.validateExtension(file);
@@ -92,11 +92,14 @@ public class TestLexicalAnalyzerJMock {
 	
 	@Test
 	public void fileHasLexicalError(){
-		final MockLexicalAnalyzerListener mock = ctx.mock(MockLexicalAnalyzerListener.class);
 		lae.addListener(mock);
-		String file = "src/file_error.cm";
+		file = "src/file_error.cm";
 		ctx.checking(new Expectations(){{
-			atLeast(1).of(mock).putError("ERR");
+			oneOf(mock).fileExist("file exists!");
+			oneOf(mock).fileValidateExtension("valid file extension!");
+			oneOf(mock).fileReadable("file read successfully!");
+			atLeast(1).of(mock).addToken("ERR");
+			ignoring(mock);
 		}});
 		lae.fileExist(file);
 		lae.validateExtension(file);
@@ -106,11 +109,14 @@ public class TestLexicalAnalyzerJMock {
 	
 	@Test
 	public void fileIsCorrect(){
-		final MockLexicalAnalyzerListener mock = ctx.mock(MockLexicalAnalyzerListener.class);
 		lae.addListener(mock);
-		String file = "src/file.cm";
+		file = "src/file.cm";
 		ctx.checking(new Expectations(){{
-			never(mock).putError("ERR");
+			oneOf(mock).fileExist("file exists!");
+			oneOf(mock).fileValidateExtension("valid file extension!");
+			oneOf(mock).fileReadable("file read successfully!");
+			never(mock).addToken("ERR");
+			ignoring(mock);
 		}});
 		lae.fileExist(file);
 		lae.validateExtension(file);
