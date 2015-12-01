@@ -17,6 +17,43 @@ A classe que executa a análise léxica possui a depêndencia de um `Listener` q
 
 Utilizando JMock podemos avaliar o que realmente é necessário ser implementado na nossa depência, guiando a implementaçao de classes melhor estruturadas. Além disso, com JMock é possível realizar os testes sem se preocupar com acesso as dependências, pois utilizamos objetos mock desacoplados que substituem as depências sem interferir no fluxo da aplicaçao.
 
+## Estrutura
+
+O programa possui 3 classes para essa aplicaçao:
+
+- `LexicalAnalyzerExecutor.java`: reponsável por realizar a análise léxica sobre o arquivo de entrada.
+- `LexicalAnalyzerListener.java`: responsável por receber os resultados das etapas da análise léxica.
+- `TestLexicalAnalyzerJMock.java`: classe responsável por realizar os testes sobre a classe que possui a depêndencia.
+
+Além disso, existem dois arquivos que foram usados para testes: `file_error.cm` e `file.cm`.
+
+## Funcionamento
+
+A classe responsável pela análise léxica - `LexicalAnalyzerExecutor.java` - possui dependência de uma classe que recebe informações das etapas de análise do arquivo de entrada - `LexicalAnalyzerListener.java`. 
+
+Nesse caso devemos trocar a depêndencia  por um `mock object` e enviá-lo para a classe que está sendo testada para verificar o que está sendo retornado.
+
+## Testes 
+
+A `Task list` utilizada foi a seguinte:
+
+- Arquivo existente.
+- Arquivo inexistente.
+- Arquivo com extensao válida.
+- Arquivo com extensao inválida.
+- Arquivo de entrada lido com sucesso.
+- Análise léxica com erros.
+- Análise léxica com sucesso.
+
+### Arquivo inexistente
+
+
+
+
+
+
+
+
 
 
 
