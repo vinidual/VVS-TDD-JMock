@@ -66,12 +66,12 @@ Temos no escopo global a instância do nosso mock:
     
 Já estamos citando um passo do processo de refatoraçao, pois inicialmente todos os testes instânciavam seu próprio mock, assim criamos somente uma instância para todos os testes.
 
-O método `.addListener()` recebe e inicializa o  `Listener`. 
-O método `.fileExiste()` é uma implementaçao necessária da `interface` que mockamos. Além disso, é esperado pelo nosso teste que esse método seja invocado uma única vez.
+O método `.addListener(mock)` recebe e inicializa o  `Listener`. 
+O método `.fileExist(String.class)` é uma implementaçao necessária da `interface` que mockamos. Além disso, é esperado pelo nosso teste que esse método seja invocado uma única vez.
 
 ### Arquivo inexistente
 
-O teste verifica a inexistencia para um dado arquivo.
+O teste verifica a inexistência para um dado arquivo.
 
       @Test
     	public void fileNotExist(){
@@ -81,6 +81,8 @@ O teste verifica a inexistencia para um dado arquivo.
     		}});
     		lae.fileExist("file.cm");
     	}
+    	
+Aqui é esperado que o método `.fileExists(String.class)` seja executado uma única vez recebendo a string `"file not found!"`.
     	
 ### Arquivo com extensao válida
 
@@ -101,6 +103,36 @@ Verifica se a extensao do arquivo é correta.
     		lae.validateExtension("sas1254.cm");
     		lae.validateExtension("###8**DIE!!@@.cm");
     	}
+
+O interessante aqui é observar que podemos criar quantos casos de testes julgarmos necessários. o método `atLeast(1)` indica que deve haver, no mínimo, 1 ocorrência válida para `"valid file extension!"`. Além disso, nunca deve ocorrer erro de extensao inválida nesse teste.
+
+### Arquivo com extensao inválida
+
+O contrário do que ocorre no teste anterior, aqui estamos interessados em obter resultados válidos para arquivos com extensao inválida, ou seja, o teste é correto se o resultado retornado é de extensao inváida. 
+
+      @Test
+    	public void fileInvalidExtension(){
+    		ctx.checking(new Expectations(){{
+    			atLeast(1).of(mock).fileValidateExtension("invalid file extension!");
+    			never(mock).fileValidateExtension("valid file extension!");
+    		}});
+    		lae.addListener(mock);
+    		lae.validateExtension("anything.txt");
+    		lae.validateExtension(".c");
+    		lae.validateExtension("filecm");
+    		lae.validateExtension("file.cm.cm.cm.cm.cm.cm.cn");
+    		lae.validateExtension("1125653");
+    		lae.validateExtension(".cm.java");
+    		lae.validateExtension("#1;A!@.8");
+    	}
+
+Assim, podemos criar vários casos de teste para validar extensoes inválidas. Aqui ocorre que será executado, ao menos 1 vez, a chamada do método `.fileValidateExtension(String.class)` do nosso mock com a string `"invalid file extension"` e nunca com string `"valid file extension!"`.
+
+### Arquivo de entrada lido com sucesso
+
+### Análise léxica com erros
+
+### Análise léxica com sucesso
 
 
 
