@@ -130,9 +130,74 @@ Assim, podemos criar vários casos de teste para validar extensoes inválidas. A
 
 ### Arquivo de entrada lido com sucesso
 
-### Análise léxica com erros
+Teste que verifica se foi criado o `buffer` que armazena os caracteres lidos do arquivo de entrada.
 
-### Análise léxica com sucesso
+      @Test
+    	public void fileReaded(){
+    		lae.addListener(mock);
+    		file = "src/file.cm";
+    		ctx.checking(new Expectations(){{
+    			oneOf(mock).fileExist("file exists!");
+    			oneOf(mock).fileValidateExtension("valid file extension!");
+    			oneOf(mock).fileReadable("file read successfully!");
+    			never(mock).fileReadable("file cannot be read!");
+    			never(mock).fileError(with(any(String.class)));
+    		}});
+    		lae.fileExist(file);
+    		lae.validateExtension(file);
+    		lae.fileReader();
+    	}
+    	
+Para que seja possível ler o arquivo de entrada, ele deve ser válido, ou seja, deve existir, `.fileExist("file exists!")`, deve ter a extensão válida, `.fileValidateExtension("valid file extension!")`, e devrmos conseguir lê-lo, `.fileReadable("file read successfully!")`. Também devemos ter que nunca deve ser gerado erro ou não ser possível ler esse arquivo, para isso temos as duas últimas `Expectations` no nosso `checking`.
+
+### Análise Léxica com erros
+
+Teste que deve verificar a ocorrência de erros durante a Análise Léxica.
+
+      @Test
+    	public void fileHasLexicalError(){
+    		lae.addListener(mock);
+    		file = "src/file_error.cm";
+    		ctx.checking(new Expectations(){{
+    			oneOf(mock).fileExist("file exists!");
+    			oneOf(mock).fileValidateExtension("valid file extension!");
+    			oneOf(mock).fileReadable("file read successfully!");
+    			atLeast(1).of(mock).addToken("ERR");
+    			ignoring(mock);
+    		}});
+    		lae.fileExist(file);
+    		lae.validateExtension(file);
+    		lae.fileReader();
+    		lae.bufferAnalyzer();
+    	}
+
+Aqui é importante que ocorra ao menos uma inserção de `Token` de erro, `"ERR"`, a instrução de `ignoring(mock)` vai ignorar qualquer outra `Expectations` que venha a ocorrer além das instruídas, pois podemos ter a adição de vários outros `Tokens` válidos, como `ID` e `NUM`, por exemplo.
+
+### Análise Léxica com sucesso
+
+Teste que verifica a ocorrência de Análise Léxica correta, nesse caso o arquivo de entrada não deve conter erros.
+
+      @Test
+    	public void fileIsCorrect(){
+    		lae.addListener(mock);
+    		file = "src/file.cm";
+    		ctx.checking(new Expectations(){{
+    			oneOf(mock).fileExist("file exists!");
+    			oneOf(mock).fileValidateExtension("valid file extension!");
+    			oneOf(mock).fileReadable("file read successfully!");
+    			never(mock).addToken("ERR");
+    			ignoring(mock);
+    		}});
+    		lae.fileExist(file);
+    		lae.validateExtension(file);
+    		lae.fileReader();
+    		lae.bufferAnalyzer();
+    	}
+    	
+Similar a estratégia utilizada no teste anterior, aqui nunca deve ocorrer a inserção de `Token` de erro, `.addToken("ERR")`.
+
+Para os teste que incluem o uso de arquivo, como leitura e análise dos caracteres, utilizamos dois arquivos de teste contidos na pasta `src` da aplicação: `file.cm` e `file_error.cm`, que se referem, respectivamente, à análise com sucesso e análise com erros.
+    	
 
 
 
