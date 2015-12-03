@@ -2,7 +2,7 @@
 
 Trabalho realizado para a disciplina de Validação e Verificação de Software ministrada pelo professor Dr. Fábio Fagundes Silveira na Unifesp campus de São José dos Campos. Atividade realizada pelos alunos:
 
-  - Karen Saori Suzuki
+  - Karen sãori Suzuki
   - Vinícius Duarte de Almeida
 
 LexicalAnalysisC- é um programa em Java para realizar a análise léxica da [linguagem C-](http://www.cs.dartmouth.edu/~cs57/Project/C-%20Spec.pdf) implementado com metodologia TDD utilizando o framework [JUnit4](http://junit.org/) e [JMock](http://jmock.org).
@@ -11,15 +11,15 @@ O objetivo desse trabalho é colocar em prática o TDD com utilização do JMock
 
 ## O Problema
 
-A classe que executa a análise léxica possui a depêndencia de um `Listener` que recebe o resultado de cada método da análise.  A análise léxica da linguagem C- é executada a partir de um arquivo de entrada com extensão .cm. Devemos guiar uma implementaçao para que possamos ter um objeto de teste desacoplado da aplicaçao, assim podemos simular cenários de teste em ambiente controlado.
+A classe que executa a análise léxica possui a depêndencia de um `Listener` que recebe o resultado de cada método da análise.  A análise léxica da linguagem C- é executada a partir de um arquivo de entrada com extensão .cm. Devemos guiar uma implementação para que possamos ter um objeto de teste desacoplado da aplicação, assim podemos simular cenários de teste em ambiente controlado.
 
-## Motivaçao
+## Motivação
 
-Utilizando JMock podemos avaliar o que realmente é necessário ser implementado na nossa depência, guiando a implementaçao de classes melhor estruturadas. Além disso, com JMock é possível realizar os testes sem se preocupar com acesso as dependências, pois utilizamos objetos mock desacoplados que substituem as depências sem interferir no fluxo da aplicaçao.
+Utilizando JMock podemos avaliar o que realmente é necessário ser implementado na nossa depência, guiando a implementação de classes melhor estruturadas. Além disso, com JMock é possível realizar os testes sem se preocupar com acesso as dependências, pois utilizamos objetos mock desacoplados que substituem as depências sem interferir no fluxo da aplicação.
 
 ## Estrutura
 
-O programa possui 3 classes para essa aplicaçao:
+O programa possui 3 classes para essa aplicação:
 
 - `LexicalAnalyzerExecutor.java`: reponsável por realizar a análise léxica sobre o arquivo de entrada.
 - `LexicalAnalyzerListener.java`: responsável por receber os resultados das etapas da análise léxica.
@@ -41,8 +41,8 @@ A `Task list` utilizada foi a seguinte:
 
 - Arquivo existente.
 - Arquivo inexistente.
-- Arquivo com extensao válida.
-- Arquivo com extensao inválida.
+- Arquivo com extensão válida.
+- Arquivo com extensão inválida.
 - Arquivo de entrada lido com sucesso.
 - Análise léxica com erros.
 - Análise léxica com sucesso.
@@ -64,10 +64,10 @@ Temos no escopo global a instância do nosso mock:
 
     final LexicalAnalyzerListener mock = ctx.mock(LexicalAnalyzerListener.class);
     
-Já estamos citando um passo do processo de refatoraçao, pois inicialmente todos os testes instânciavam seu próprio mock, assim criamos somente uma instância para todos os testes.
+Já estamos citando um passo do processo de refatoração, pois inicialmente todos os testes instânciavam seu próprio mock, assim criamos somente uma instância para todos os testes.
 
 O método `.addListener(mock)` recebe e inicializa o  `Listener`. 
-O método `.fileExist(String.class)` é uma implementaçao necessária da `interface` que mockamos. Além disso, é esperado pelo nosso teste que esse método seja invocado uma única vez.
+O método `.fileExist(String.class)` é uma implementação necessária da `interface` que mockamos. Além disso, é esperado pelo nosso teste que esse método seja invocado uma única vez.
 
 ### Arquivo inexistente
 
@@ -84,9 +84,9 @@ O teste verifica a inexistência para um dado arquivo.
     	
 Aqui é esperado que o método `.fileExists(String.class)` seja executado uma única vez recebendo a string `"file not found!"`.
     	
-### Arquivo com extensao válida
+### Arquivo com extensão válida
 
-Verifica se a extensao do arquivo é correta.
+Verifica se a extensão do arquivo é correta.
 
       @Test
     	public void fileValidExtension(){
@@ -104,11 +104,11 @@ Verifica se a extensao do arquivo é correta.
     		lae.validateExtension("###8**DIE!!@@.cm");
     	}
 
-O interessante aqui é observar que podemos criar quantos casos de testes julgarmos necessários. o método `atLeast(1)` indica que deve haver, no mínimo, 1 ocorrência válida para `"valid file extension!"`. Além disso, nunca deve ocorrer erro de extensao inválida nesse teste.
+O interessante aqui é observar que podemos criar quantos casos de testes julgarmos necessários. o método `atLeast(1)` indica que deve haver, no mínimo, 1 ocorrência válida para `"valid file extension!"`. Além disso, nunca deve ocorrer erro de extensão inválida nesse teste.
 
-### Arquivo com extensao inválida
+### Arquivo com extensão inválida
 
-O contrário do que ocorre no teste anterior, aqui estamos interessados em obter resultados válidos para arquivos com extensao inválida, ou seja, o teste é correto se o resultado retornado é de extensao inváida. 
+O contrário do que ocorre no teste anterior, aqui estamos interessados em obter resultados válidos para arquivos com extensão inválida, ou seja, o teste é correto se o resultado retornado é de extensão inváida. 
 
       @Test
     	public void fileInvalidExtension(){
@@ -198,6 +198,58 @@ Similar a estratégia utilizada no teste anterior, aqui nunca deve ocorrer a ins
 
 Para os teste que incluem o uso de arquivo, como leitura e análise dos caracteres, utilizamos dois arquivos de teste contidos na pasta `src` da aplicação: `file.cm` e `file_error.cm`, que se referem, respectivamente, à análise com sucesso e análise com erros.
     	
+## Interface
+
+A classe testada `LexicalAnalyzerExecutor.java` possui a dependência `LexicalAnalyzerListener.java`, assim geramos uma interface dessa classe para testar as respostas obtidas da classe de teste em um ambiente controlado e de forma desacoplada do restante do fluxo da aplicação, gerando a seguinte `Interface`:
+
+      public interface LexicalAnalyzerListener {
+      	
+      	public abstract boolean fileExist(String msg);
+      	
+      	public abstract boolean fileValidateExtension(String msg);
+      
+      	public abstract boolean fileReadable(String string);
+      
+      	public abstract boolean fileError(String message);
+      
+      	public abstract void addToken(String string);
+      	
+      }
+      
+Notamos que a `Interface` nos guia uma implementação que utilizamos somente métodos que realmente são necessários a nossa aplicação, o que permite criar um código mais consistente e organizado.
+      
+## Casos de Teste
+
+Além dos casos vistos no próprio código, os arquivos podem ser editados e testados para diferentes entradas. 
+
+Assim, verificamos alguns casos que engloba valores limites (ASCII) dos símbolos não pertencentes à linguagem.
+
+Além da combinação de caracteres diversos pertencentes a linguagem, independente de espaçamento, tabulação ou quebra de linha.
+
+## Refatoração
+
+Foram poucas necessárias, foram colocados os seguintes objeto no escopo global da classe `TesteLexicalAnalyzerJMock.java`:
+
+    final LexicalAnalyzerListener mock = ctx.mock(LexicalAnalyzerListener.class);
+    String file;
+
+## Conclusões
+
+Algumas conclusões observadas:
+
+- Com JMock podemos verificar quais os métodos que realmente testamos da nossa dependência, ou seja, quais realmente são utilizados pela classe testada.
+
+- Não importa o que a dependência vai fazer com a resposta obtida, me importa somente o que é retornado.
+
+- Com a implementacao de interface conseguidos testar a dependência de forma desacoplada do código, em ambiente controlado. 
+
+## Referências
+
+- JMock API: http://www.jmock.org/
+
+- Vídeo aula sobre JMock, autor: Eduardo Guerra: https://www.youtube.com/watch?v=C1t4Zabi6S
+
+
 
 
 
